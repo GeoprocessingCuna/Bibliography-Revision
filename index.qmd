@@ -2,31 +2,17 @@
 title: "MaxentRef"
 ---
 
-# ================================
-
-# R Workflow: Retrieving Relevant Articles on MaxEnt Modeling in Coffee Cultivation
-
-# Author: Inácio Samuel Cuna
-
-# Profession: Agronomist
-
-# Affiliation: Agricultural Research Institute of Mozambique (IIAM)
-
-# Current Role: M.Sc. Student in Geoprocessing and Remote Sensing, Department of Agriculture
-
-# Federal University of Lavras (UFLA), Brazil
-
-# ================================
-
-# 
-
-# ====================
+# ===================
 
 # Install required packages
 
 # ====================
 
-install.packages("rcrossref") \# Access to CrossRef API install.packages("dplyr") \# Data wrangling install.packages("readr") \# CSV export
+install.packages("rcrossref") \# Access to CrossRef API
+
+install.packages("dplyr") \# Data wrangling
+
+install.packages("readr") \# CSV export
 
 # ====================
 
@@ -110,10 +96,6 @@ head(results\$title)
 # ====================
 
 output_path \<- "E:/Maxent/Revisao/artigos_cafe_maxent.csv" write_csv(results, output_path)
-
-# ====================
-
-# Optional: Render a Quarto document (if available)
 
 # ====================
 
