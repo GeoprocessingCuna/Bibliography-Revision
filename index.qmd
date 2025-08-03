@@ -1,0 +1,120 @@
+---
+title: "MaxentRef"
+---
+
+# ================================
+
+# R Workflow: Retrieving Relevant Articles on MaxEnt Modeling in Coffee Cultivation
+
+# Author: Inácio Samuel Cuna
+
+# Profession: Agronomist
+
+# Affiliation: Agricultural Research Institute of Mozambique (IIAM)
+
+# Current Role: M.Sc. Student in Geoprocessing and Remote Sensing, Department of Agriculture
+
+# Federal University of Lavras (UFLA), Brazil
+
+# ================================
+
+# 
+
+# ====================
+
+# Install required packages
+
+# ====================
+
+install.packages("rcrossref") \# Access to CrossRef API install.packages("dplyr") \# Data wrangling install.packages("readr") \# CSV export
+
+# ====================
+
+# Load required packages
+
+# ====================
+
+library(rcrossref)\
+library(dplyr)\
+library(readr)
+
+# ====================
+
+# Function: Search scientific articles
+
+# ====================
+
+# This function queries the CrossRef database for journal articles matching the
+
+# provided keywords and returns a dataframe with metadata.
+
+# It handles pagination to fetch multiple pages of results.
+
+search_articles \<- function(keywords, max_results = 500, page_size = 100) { all_results \<- list() total_fetched \<- 0 offset \<- 0
+
+while (total_fetched \< max_results) { current_limit \<- min(page_size, max_results - total_fetched)
+
+```         
+response <- cr_works(
+  query = keywords,
+  filter = c(from_pub_date = "2015-01-01", type = "journal-article"),
+  limit = current_limit,
+  offset = offset
+)
+
+# Stop if no more results are found
+if (is.null(response$data) || nrow(response$data) == 0) {
+  cat("No more articles found.\n")
+  break
+}
+
+all_results[[length(all_results) + 1]] <- response$data
+total_fetched <- total_fetched + nrow(response$data)
+offset <- offset + nrow(response$data)
+
+cat("Articles retrieved so far:", total_fetched, "\n")
+```
+
+}
+
+articles_df \<- bind_rows(all_results) return(articles_df) }
+
+# ====================
+
+# Step 1: Define search keywords
+
+# ====================
+
+keywords \<- "MaxEnt Coffea modeling"
+
+# ====================
+
+# Step 2: Run article search
+
+# ====================
+
+results \<- search_articles(keywords)
+
+# ====================
+
+# Step 3: Preview results (titles only)
+
+# ====================
+
+head(results\$title)
+
+# ====================
+
+# Step 4: Save to CSV
+
+# ====================
+
+output_path \<- "E:/Maxent/Revisao/artigos_cafe_maxent.csv" write_csv(results, output_path)
+
+# ====================
+
+# Optional: Render a Quarto document (if available)
+
+# ====================
+
+# 
