@@ -1,0 +1,106 @@
+---
+title: Automatic Unification and Filtering of Crossref, Scopus, and Web of Science Files
+author: "Inacio Samuel Cuna"
+date: "2025-09-09"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+  pdf_document:
+    toc: true
+---
+**Objective**
+
+Demonstrate the process of unification, standardization, and automatic filtering of bibliographic references
+
+**Introduction**
+
+The literature review is one of the fundamental pillars in building scientific research. However, when using more than one database (for example, Crossref, Scopus, and Web of Science), it is common to find overlapping records, metadata inconsistencies, and the presence of irrelevant publications (such as editorials, notes, or articles outside the defined period).
+
+To address these challenges, this report presents an automated R pipeline capable of:
+
+-Importing files from different scientific indexing sources.
+
+-Merging references into a single database.
+
+-Identifying and removing duplicates (based on DOI and title similarity).
+
+-Applying automatic filters according to defined criteria (minimum year, keywords, among others).
+
+-Exporting cleaned versions of the database, including a reduced version containing only essential columns.
+
+This procedure aims to streamline and standardize the processing of bibliographic data, providing a reliable basis for bibliometric analyses and systematic reviews.
+
+**Load Packages**
+```{r}
+library(bibliometrix)                             # reading, conversion and analysis of bibliographic data
+library(dplyr)                                    # data manipulation (filtering, selection, grouping)
+library(openxlsx)                                 # read/write Excel files (.xlsx)
+```
+
+**Data Import**
+```{r}
+scopus<-convert2df("E:/Maxent/Artigo1/scopus.csv", dbsource = "scopus", format = "csv")
+wos<-convert2df("E:/Maxent/Artigo1/savedrecs_WOS.csv", dbsource = "scopus", format = "csv")
+crossref<-convert2df("E:/Maxent/Artigo1/artigos_cafe.csv", dbsource = "scopus", format = "csv")
+```
+**Data Unification**
+```{r}
+merg <- mergeDbSources(list(scopus, wos, crossref), remove.duplicated = TRUE)
+merg
+```
+**Record Filtering**
+**1. Remove duplicates by DOI**
+```{r}
+merg <- merg %>% distinct(DI, .keep_all = TRUE)
+merg
+```
+**2. Exclude entries without title or year**
+```{r}
+merg <- merg %>% filter(!is.na(TI), !is.na(PY))
+merg
+```
+**3. Filter by keywords in the title**
+```{r}
+merg <- merg %>% filter(grepl("coffee|arabica|maxent", TI, ignore.case = TRUE))
+merg
+```
+
+**Selection of Relevant Columns**
+```{r}
+# The original dataset has dozens of columns.
+# Here we select only the most informative ones:
+# - DI: DOI
+# - TI: Title
+# - AB: Abstract
+# - AU: Authors
+# - SO: Source (journal)
+# - PY: Year
+# - DT: Document type
+# - DE: Author keywords
+# - ID: Indexed keywords
+# - TC: Times cited
+
+M_small <- merg %>%
+  select(DI, TI, AB, AU, SO, PY, DT, DE, ID, TC)
+M_small
+```
+
+
+**Export Reduced Database for Later Use**
+```{r}
+#write.xlsx(M_small,
+   #        file = "E:/Maxent/Artigo1/base_unificada.xlsx",
+     #      rowNames = FALSE)  # do not save row names
+```
+**Basic Visualization of Bibliometric Indicators**
+```{r}
+res <- biblioAnalysis(merg)
+ds <- summary(object = res, k= 10)
+plot(res, k=10)
+```
+**Interactive Graphical Interface for More Detailed Exploration**
+```{r}
+# biblioshiny()
+```
+
